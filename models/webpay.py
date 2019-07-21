@@ -20,7 +20,7 @@ except:
     _logger.warning("No Load suds or wsse")
     pass
 
-URLS ={
+URLS = {
     'integ': 'https://webpay3gint.transbank.cl/WSWebpayTransaction/cxf/WSWebpayService?wsdl',
     'test': 'https://webpay3gint.transbank.cl/WSWebpayTransaction/cxf/WSWebpayService?wsdl',
     'prod': 'https://webpay3g.transbank.cl/WSWebpayTransaction/cxf/WSWebpayService?wsdl',
@@ -97,7 +97,8 @@ class PaymentAcquirerWebpay(models.Model):
 
     @api.multi
     def webpay_form_generate_values(self, values):
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param(
+                    'web.base.url')
         values.update({
             'business': self.company_id.name,
             'item_name': '%s: %s' % (self.company_id.name, values['reference']),
@@ -112,13 +113,16 @@ class PaymentAcquirerWebpay(models.Model):
             'zip_code': values.get('partner_zip'),
             'first_name': values.get('partner_first_name'),
             'last_name': values.get('partner_last_name'),
-            'return_url': base_url + '/payment/webpay/final'
+            'return_url': base_url + '/payment/webpay/final',
+            'fees': values.get('fees', 0),
         })
+        _logger.warning("fees %s" %values)
         return values
 
     @api.multi
     def webpay_get_form_action_url(self,):
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param(
+                    'web.base.url')
         return base_url + '/payment/webpay/redirect'
 
     def get_private_key(self):
@@ -154,7 +158,8 @@ class PaymentAcquirerWebpay(models.Model):
     Como respuesta a la invocacion se genera un token que representa en forma unica una transaccion.
     """
     def initTransaction(self, post):
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param(
+                    'web.base.url')
         client = self.get_client()
         client.options.cache.clear()
         init = client.factory.create('wsInitTransactionInput')
@@ -169,8 +174,16 @@ class PaymentAcquirerWebpay(models.Model):
         init.finalURL = post['return_url'] + '/' + str(self.id)
 
         detail = client.factory.create('wsTransactionDetail')
-        detail.amount = post['amount']
-
+        amount = (float(post['amount']) + float(post['fees']))
+        currency = self.env['res.currency'].search([
+            ('name', '=', post['currency_code']),
+        ])
+        if self.force_currency and currency != self.force_currency_id:
+            detail.amount = lambda price: currency.compute(
+                                amount,
+                                self.force_currency_id)
+        else:
+            detail.amount = amount
         detail.commerceCode = self.webpay_commer_code
         detail.buyOrder = post['item_number']
 
@@ -206,11 +219,7 @@ class PaymentTxWebpay(models.Model):
         client = acquirer_id.get_client()
         client.options.cache.clear()
         transactionResultOutput = client.service.getTransactionResult(token)
-        acknowledge = self.acknowledgeTransaction(acquirer_id, token)
-        if not acknowledge:
-            _logger.warning("not acknowledge %s" % acknowledge)
-        else:
-            _logger.warning("acknowledge")
+        self.acknowledgeTransaction(acquirer_id, token)
         return transactionResultOutput
 
     """

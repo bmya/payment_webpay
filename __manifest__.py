@@ -2,20 +2,20 @@
 
 {
     'name': 'Webpay Payment Acquirer',
-    'category': 'Accounting',
+    'category': 'Payment / Chile',
     'author': 'Daniel Santibáñez Polanco',
-    'summary': 'Payment Acquirer: Webpay Implementation',
+    'summary': 'Payment Acquirer: Chilean Webpay Implementation',
     'website': 'https://odoocoop.cl',
-    'version': "1.2.3",
-    'description': """Webpay Payment Acquirer""",
+    'version': "1.3.0",
+    'description': """Chilean Webpay Payment Acquirer""",
     'depends': [
                 'payment',
+                'payment_currency',
                 'sale_payment',
             ],
-        'external_dependencies': {
-            'python':[
+    'external_dependencies': {
+        'python': [
             'suds',
-            #'wsse',
             'xmlsec',
             'urllib3',
             # En Debian/Ubuntu:

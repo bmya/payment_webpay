@@ -8,6 +8,8 @@
             <field name="provider">webpay</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="view_template_id" ref="webpay_acquirer_button"/>
+            <field name="force_currency" eval="True"/>
+            <field name="force_currency_id" ref="base.CLP" />
             <field name="environment">test</field>
             <field name="pre_msg"><![CDATA[
 <p>You will be redirected to the Webpay website after clicking on the payment button.</p>]]></field>

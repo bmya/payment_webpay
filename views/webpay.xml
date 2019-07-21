@@ -7,8 +7,8 @@
                 <input type="hidden" name="item_number" t-att-value="item_number"/>
                 <input type="hidden" name="business" t-att-value="business"/>
                 <input type="hidden" name="amount" t-att-value="amount"/>
-                <input t-if="handling" type="hidden" name="handling"
-                    t-att-value="handling"/>
+                <input t-if="fees" type="hidden" name="fees"
+                    t-att-value="fees"/>
                 <input type="hidden" name="currency_code" t-att-value="currency_code"/>
                 <!-- partner / address data -->
                 <input type="hidden" name="address1" t-att-value="address1"/>
