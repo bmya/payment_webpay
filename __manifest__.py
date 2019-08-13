@@ -6,7 +6,7 @@
     'author': 'Daniel Santibáñez Polanco',
     'summary': 'Payment Acquirer: Chilean Webpay Implementation',
     'website': 'https://odoocoop.cl',
-    'version': "1.3.0",
+    'version': "1.4.0",
     'description': """Chilean Webpay Payment Acquirer""",
     'depends': [
                 'payment',

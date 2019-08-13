@@ -104,7 +104,6 @@ class PaymentAcquirerWebpay(models.Model):
             'item_name': '%s: %s' % (self.company_id.name, values['reference']),
             'item_number': values['reference'],
             'amount': values['amount'],
-            'currency_code': values['currency'] and values['currency'].name or '',
             'address1': values.get('partner_address'),
             'city': values.get('partner_city'),
             'country': values.get('partner_country') and values.get('partner_country').code or '',
@@ -176,22 +175,19 @@ class PaymentAcquirerWebpay(models.Model):
         detail = client.factory.create('wsTransactionDetail')
         amount = (float(post['amount']) + float(post['fees']))
         currency = self.env['res.currency'].search([
-            ('name', '=', post['currency_code']),
+            ('name', '=', post.get('currency', 'CLP')),
         ])
         if self.force_currency and currency != self.force_currency_id:
-            detail.amount = lambda price: currency.compute(
+            amount = lambda price: currency.compute(
                                 amount,
                                 self.force_currency_id)
-        else:
-            detail.amount = amount
+            currency = self.force_currency
+        detail.amount = currency.round(amount)
         detail.commerceCode = self.webpay_commer_code
         detail.buyOrder = post['item_number']
-
         init.transactionDetails.append(detail)
         init.wPMDetail = client.factory.create('wpmDetailInput')
-
         wsInitTransactionOutput = client.service.initTransaction(init)
-
         return wsInitTransactionOutput
 
 
