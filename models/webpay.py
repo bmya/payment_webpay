@@ -173,7 +173,10 @@ class PaymentAcquirerWebpay(models.Model):
         init.finalURL = post['return_url'] + '/' + str(self.id)
 
         detail = client.factory.create('wsTransactionDetail')
-        amount = (float(post['amount']) + float(post['fees']))
+        try:
+            amount = (float(post['amount']) + float(post['fees']))
+        except KeyError:
+            amount = float(post['amount'])
         currency = self.env['res.currency'].search([
             ('name', '=', post.get('currency', 'CLP')),
         ])
